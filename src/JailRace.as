@@ -33,12 +33,9 @@ package
 		{
 			trace('JailRace started...');
 			initStage(); // Setting stage background and scale options
-			initMenu();
+			//initMenu();
 			
-			
-			
-			
-			/*createVehicles(); // Creating vehicles
+			createVehicles(); // Creating vehicles
 			bindVehiclesKeys(); // Key bindings
 			
 			// Engine stuff
@@ -47,14 +44,14 @@ package
 			engine.addVehicle(vehicle1);
 			createHUD(); // Head up display (HUD)
 			trace('Starting engine...');
-			engine.start();*/
+			engine.start();
 		}
 		
 		private function initStage():void
 		{
 			trace('Disabling stage scaling...');
 			stage.scaleMode = StageScaleMode.NO_SCALE;
-			//stage.align = StageAlign.TOP_LEFT; // Align stage on top left
+			stage.align = StageAlign.TOP_LEFT; // Align stage on top left
 			trace('Stage size:', stage.stageWidth, 'x', stage.stageHeight);
 			// Creates background
 			bgShape = new Sprite;
