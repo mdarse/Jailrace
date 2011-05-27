@@ -3,6 +3,7 @@ package fr.mathieudarse.peanut
 	import flash.display.Sprite;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
+	import flash.text.engine.TextElement;
 	
 	public class HUDisplay extends Sprite
 	{
