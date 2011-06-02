@@ -1,6 +1,7 @@
 package fr.mathieudarse.peanut
 {
 	import com.coreyoneil.collision.CollisionGroup;
+	import com.greensock.loading.LoaderMax;
 	
 	import flash.display.Stage;
 	import flash.events.Event;
@@ -12,16 +13,17 @@ package fr.mathieudarse.peanut
 	{
 		private var keyPoll:KeyPoll;
 		private var collisionGroup:CollisionGroup;
-		private var stage:Stage;
 		private var vehicles:Array = new Array;
 		private var radianCoef:Number = Math.PI/180;
 		private var speedCoef:Number = 0.5;
 		
-		public var hud:HUDisplay;
+		private var _stage:Stage;
+		private var _currentTrack:Track;
+		private var _hud:HUDisplay;
 		
 		public function Engine(stage:Stage):void
 		{
-			this.stage = stage
+			_stage = stage;
 			collisionGroup = new CollisionGroup;
 		}
 		
@@ -31,15 +33,28 @@ package fr.mathieudarse.peanut
 			collisionGroup.addItem(vehicle);
 		}
 		
+		public function loadTrack(config:XML):void
+		{
+			trace('Loading a new track...');
+			var _currentTrack:Track = new Track(config);
+			_stage.addChildAt(_currentTrack, 0);
+			
+		}
+		
 		public function start():void
 		{
-			keyPoll = new KeyPoll(stage);
-			stage.addEventListener(Event.ENTER_FRAME, loop);
+			keyPoll = new KeyPoll(_stage);
+			
+			trace('Creating head up display...');
+			_hud = new HUDisplay;
+			_stage.addChild(_hud);
+			
+			_stage.addEventListener(Event.ENTER_FRAME, loop);
 		}
 		
 		public function stop():void
 		{
-			stage.removeEventListener(Event.ENTER_FRAME, loop);
+			_stage.removeEventListener(Event.ENTER_FRAME, loop);
 		}
 		
 		private function loop(event:Event):void
@@ -64,16 +79,16 @@ package fr.mathieudarse.peanut
 					updatePosition(vehicle);
 				}
 			}
-			// Updating speed on HUD
-			hud.textField.text = "V1 speed: "+String(vehicles[0].speed)+"\nV2 speed: "+String(vehicles[1].speed);
+			// Updating speeds on HUD
+			_hud.setSpeed(vehicles[0].speed, vehicles[1].speed);
 		}
 		
 		private function isColliding():Boolean
 		{
 			var collisions:Array = collisionGroup.checkCollisions();
-			hud.collides.text = "No collidings";
+			_hud.collides.text = "No collidings";
 			for each (var collision:Object in collisions) {
-				hud.collides.text = collision.object1.toString() + " colliding with " + collision.object2.toString() + "\n";
+				_hud.collides.text = collision.object1.toString() + " colliding with " + collision.object2.toString() + "\n";
 			}
 			if(collisions.length >= 1) {
 				return true;

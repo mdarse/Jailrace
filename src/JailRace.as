@@ -1,48 +1,88 @@
 package
 {
+	import com.greensock.events.LoaderEvent;
+	import com.greensock.loading.ImageLoader;
+	import com.greensock.loading.LoaderMax;
+	import com.greensock.loading.XMLLoader;
+	
 	import flash.display.Bitmap;
+	import flash.display.Shape;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
+	import flash.text.TextField;
 	import flash.ui.Keyboard;
 	
 	import fr.mathieudarse.peanut.Car;
 	import fr.mathieudarse.peanut.Engine;
 	import fr.mathieudarse.peanut.HUDisplay;
 	import fr.mathieudarse.peanut.MenuContainer;
+	import fr.mathieudarse.peanut.Track;
 	import fr.mathieudarse.peanut.Vehicle;
 	
 	//[SWF(width="500", height="450", frameRate="60", backgroundColor="#FFFFFF")]
-	[SWF(width="960", height="540")]
+	[SWF(width="960", height="540", backgroundColor="0xAAAAAA")]
 	public class JailRace extends Sprite
 	{
-		private var bgShape:Sprite;
-		private var bgColor:uint = 0xAAAAAA;
+		private var _bgShape:Shape;
+		private var _bgColor:uint = 0x000000;
 		
 		private var menu:MenuContainer;
 		private var vehicle0:Vehicle;
 		private var vehicle1:Vehicle;
 		private var engine:Engine;
 		private var hud:HUDisplay;
-		private var data:XML;
+		
+		private var _tracks:XML;
+		private var _menus:XML;
 		
 		public function JailRace()
 		{
 			trace('JailRace started...');
+			_init();
+		}
+		
+		private function _init():void
+		{
+			// Create data loader
+			LoaderMax.activate([ImageLoader]);
+			var queue:LoaderMax = new LoaderMax({
+				name: 'mainQueue', 
+				onProgress: onLoaderProgress, 
+				onComplete: onLoaderComplete, 
+				onError: onLoaderError
+			});
+			// Load config
+			queue.append(new XMLLoader('config/tracks.xml', {name: 'tracks'}));
+			queue.append(new XMLLoader('config/menus.xml', {name: 'menus'}));
+			queue.load();
+			
 			initStage(); // Setting stage background and scale options
 			//initMenu();
+			
 			
 			createVehicles(); // Creating vehicles
 			bindVehiclesKeys(); // Key bindings
 			
-			// Engine stuff
-			engine = new Engine(this.stage);
+		}
+
+		private function getTrackXML(id:String):XML
+		{
+			return _tracks.track.(@id==id)[0];
+		}
+		
+		private function initEngine():void
+		{
+			engine = new Engine(stage);
+			
+			engine.loadTrack(getTrackXML('thefirstone'));
+			
 			engine.addVehicle(vehicle0);
 			engine.addVehicle(vehicle1);
-			createHUD(); // Head up display (HUD)
+			
 			trace('Starting engine...');
 			engine.start();
 		}
@@ -53,19 +93,25 @@ package
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT; // Align stage on top left
 			trace('Stage size:', stage.stageWidth, 'x', stage.stageHeight);
-			// Creates background
-			bgShape = new Sprite;
-			bgShape.graphics.beginFill(bgColor);
-			bgShape.graphics.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
-			bgShape.graphics.endFill();
-			addChildAt(bgShape, 0);
-			stage.addEventListener(Event.RESIZE, updateBackgroundSize);
+			
+			// Create a grey rectangle as background
+			//initBackground();
 		}
 		
-		private function updateBackgroundSize(e:Event):void
+		private function initBackground():void
 		{
-			bgShape.width = stage.stageWidth;
-			bgShape.height = stage.stageHeight;
+			_bgShape = new Shape;
+			_bgShape.graphics.beginFill(_bgColor);
+			_bgShape.graphics.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
+			_bgShape.graphics.endFill();
+			addChildAt(_bgShape, 0);
+			stage.addEventListener(Event.RESIZE, onStageResize);
+		}
+		
+		private function onStageResize(e:Event):void
+		{
+			_bgShape.width = stage.stageWidth;
+			_bgShape.height = stage.stageHeight;
 			trace('Stage resized to:', stage.stageWidth, 'x', stage.stageHeight);
 		}
 		
@@ -115,12 +161,21 @@ package
 			vehicle1.downKey = 83;   // S key (83)
 		}
 		
-		private function createHUD():void
-		{
-			trace('Creating head up display...');
-			hud = new HUDisplay;
-			addChild(hud);
-			engine.hud = hud;
+		private function onLoaderProgress(event:LoaderEvent):void{
+			//trace("progress: " + event.target.progress);
+		}
+		
+		private function onLoaderComplete(event:LoaderEvent):void {
+			//trace(event.target + " is complete!");
+			
+			_tracks = LoaderMax.getContent('tracks');
+			_menus = LoaderMax.getContent('menus');
+			
+			initEngine();
+		}
+		
+		private function onLoaderError(event:LoaderEvent):void {
+			trace("error occured with " + event.target + ": " + event.text);
 		}
 	}
 }
