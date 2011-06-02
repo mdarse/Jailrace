@@ -91,27 +91,27 @@ package
 		{
 			trace('Disabling stage scaling...');
 			stage.scaleMode = StageScaleMode.NO_SCALE;
-			stage.align = StageAlign.TOP_LEFT; // Align stage on top left
+			//stage.align = StageAlign.TOP_LEFT; // Align stage on top left
 			trace('Stage size:', stage.stageWidth, 'x', stage.stageHeight);
 			
 			// Create a grey rectangle as background
-			//initBackground();
+			initBackground();
 		}
 		
 		private function initBackground():void
 		{
-			_bgShape = new Shape;
+			/*_bgShape = new Shape;
 			_bgShape.graphics.beginFill(_bgColor);
 			_bgShape.graphics.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
 			_bgShape.graphics.endFill();
-			addChildAt(_bgShape, 0);
+			addChildAt(_bgShape, 0);*/
 			stage.addEventListener(Event.RESIZE, onStageResize);
 		}
 		
 		private function onStageResize(e:Event):void
 		{
-			_bgShape.width = stage.stageWidth;
-			_bgShape.height = stage.stageHeight;
+			//_bgShape.width = stage.stageWidth;
+			//_bgShape.height = stage.stageHeight;
 			trace('Stage resized to:', stage.stageWidth, 'x', stage.stageHeight);
 		}
 		
