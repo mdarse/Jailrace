@@ -49,15 +49,15 @@ package fr.mathieudarse.peanut
 			_hud = new HUDisplay;
 			_stage.addChild(_hud);
 			
-			_stage.addEventListener(Event.ENTER_FRAME, loop);
+			_stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		
 		public function stop():void
 		{
-			_stage.removeEventListener(Event.ENTER_FRAME, loop);
+			_stage.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		
-		private function loop(event:Event):void
+		private function onEnterFrame(event:Event):void
 		{
 			for each (var vehicle:Vehicle in vehicles) {
 				updateSpeed(vehicle);
@@ -125,6 +125,20 @@ package fr.mathieudarse.peanut
 			// Update to new positions
 			vehicle.x += vehicle.speed*speedCoef*Math.cos(vehicle.rotation*radianCoef);
 			vehicle.y += vehicle.speed*speedCoef*Math.sin(vehicle.rotation*radianCoef);
+			
+			// Prevent vehicle from going out of screen
+			if(vehicle.x > _stage.stageWidth) {
+				vehicle.x -= _stage.stageWidth;
+			}
+			if(vehicle.x < 0) {
+				vehicle.x += _stage.stageWidth;
+			}
+			if(vehicle.y > _stage.stageHeight) {
+				vehicle.y -= _stage.stageHeight;
+			}
+			if(vehicle.y < 0) {
+				vehicle.y += _stage.stageHeight;
+			}
 		}
 		
 		private function handleCollision(vehicle:Vehicle):void
