@@ -7,6 +7,9 @@ package fr.mathieudarse.peanut
 	public class HUDisplay extends Sprite
 	{
 		private var _textField:TextField;
+		private var _color:uint = 0xAAAAAA;
+		private var _fontsize:uint = 10;
+		private var _font:String = 'Verdana';
 		
 		public var collides:TextField;
 		
@@ -15,7 +18,7 @@ package fr.mathieudarse.peanut
 			super();
 			
 			_textField = new TextField();
-			_textField.defaultTextFormat = new TextFormat('Verdana', 10, 0xffffff);
+			_textField.defaultTextFormat = new TextFormat(_font, _fontsize, _color);
 			addChild(_textField);
 			
 			collides = new TextField();

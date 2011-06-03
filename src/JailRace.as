@@ -24,11 +24,11 @@ package
 	import fr.mathieudarse.peanut.Vehicle;
 	
 	//[SWF(width="500", height="450", frameRate="60", backgroundColor="#FFFFFF")]
-	[SWF(width="960", height="540", backgroundColor="0xAAAAAA")]
+	[SWF(width="960", height="540")]
 	public class JailRace extends Sprite
 	{
-		private var _bgShape:Shape;
-		private var _bgColor:uint = 0x000000;
+		//private var _bgShape:Shape;
+		//private var _bgColor:uint = 0x000000;
 		
 		private var menu:MenuContainer;
 		private var vehicle0:Vehicle;
@@ -135,7 +135,7 @@ package
 			trace('Creating vehicles...');
 			// First vehicle
 			vehicle0 = new Car;
-			vehicle0.color = 0xff0000;
+			vehicle0.color = 0x000000;
 			vehicle0.draw();
 			addChild(vehicle0);
 			// Second vehicle

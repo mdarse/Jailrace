@@ -1,6 +1,7 @@
 package fr.mathieudarse.peanut
 {
 	import com.coreyoneil.collision.CollisionGroup;
+	import com.coreyoneil.collision.CollisionList;
 	import com.greensock.loading.LoaderMax;
 	
 	import flash.display.Stage;
@@ -13,12 +14,13 @@ package fr.mathieudarse.peanut
 	{
 		private var keyPoll:KeyPoll;
 		private var collisionGroup:CollisionGroup;
-		private var vehicles:Array = new Array;
 		private var radianCoef:Number = Math.PI/180;
 		private var speedCoef:Number = 0.5;
 		
 		private var _stage:Stage;
 		private var _currentTrack:Track;
+		private var _vehicles:Array = new Array;
+		private var _cdk:CollisionList;
 		private var _hud:HUDisplay;
 		
 		public function Engine(stage:Stage):void
@@ -29,8 +31,11 @@ package fr.mathieudarse.peanut
 		
 		public function addVehicle(vehicle:Vehicle):void
 		{
-			vehicles.push(vehicle);
+			_vehicles.push(vehicle);
 			collisionGroup.addItem(vehicle);
+			
+			//TEST
+			_cdk.addItem(vehicle);
 		}
 		
 		public function loadTrack(config:XML):void
@@ -39,6 +44,9 @@ package fr.mathieudarse.peanut
 			var _currentTrack:Track = new Track(config);
 			_stage.addChildAt(_currentTrack, 0);
 			
+			//TEST
+			_cdk = new CollisionList(_currentTrack.areas);
+			_cdk.excludeColor(0xFFFFFFFF, 255, 0, 0, 0);
 		}
 		
 		public function start():void
@@ -59,13 +67,18 @@ package fr.mathieudarse.peanut
 		
 		private function onEnterFrame(event:Event):void
 		{
-			for each (var vehicle:Vehicle in vehicles) {
+			for each (var vehicle:Vehicle in _vehicles) {
 				updateSpeed(vehicle);
 				/*if(isColliding()) {
 					handleCollision(vehicle);
 				}*/
 				updateDirection(vehicle);
 				if(vehicle.speed != 0) {
+					//TEST
+					for each(var c:Object in _cdk.checkCollisions()) {
+						//trace('Collision between '+c.object1+' and '+c.object2+' (angle '+c.angle+')');
+						_hud.collides.text = c.object1+" colliding with "+c.object2+"\n";
+					}
 					
 					// Kinetic
 					if(keyPoll.isUp(vehicle.upKey) && vehicle.speed > 0) {
@@ -80,7 +93,7 @@ package fr.mathieudarse.peanut
 				}
 			}
 			// Updating speeds on HUD
-			_hud.setSpeed(vehicles[0].speed, vehicles[1].speed);
+			_hud.setSpeed(_vehicles[0].speed, _vehicles[1].speed);
 		}
 		
 		private function isColliding():Boolean
@@ -139,6 +152,7 @@ package fr.mathieudarse.peanut
 			if(vehicle.y < 0) {
 				vehicle.y += _stage.stageHeight;
 			}
+			trace(vehicle.x+'x'+vehicle.y);
 		}
 		
 		private function handleCollision(vehicle:Vehicle):void
