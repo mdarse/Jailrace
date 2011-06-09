@@ -1,7 +1,6 @@
 package fr.mathieudarse.peanut
 {
 	import com.coreyoneil.collision.CollisionGroup;
-	import com.coreyoneil.collision.CollisionList;
 	import com.greensock.loading.LoaderMax;
 	
 	import flash.display.Stage;
@@ -12,91 +11,94 @@ package fr.mathieudarse.peanut
 	
 	public class Engine
 	{
-		private var keyPoll:KeyPoll;
-		private var collisionGroup:CollisionGroup;
-		private var radianCoef:Number = Math.PI/180;
-		private var speedCoef:Number = 0.5;
+		//private var keyPoll:KeyPoll;
+		//private var collisionGroup:CollisionGroup;
+		private const PI_OVER_ONE_HEIGHTY:Number = Math.PI/180;
 		
 		private var _stage:Stage;
 		private var _currentTrack:Track;
 		private var _vehicles:Array = new Array;
-		private var _cdk:CollisionList;
+		private var _cGroup:CollisionGroup;
 		private var _hud:HUDisplay;
 		
 		public function Engine(stage:Stage):void
 		{
 			_stage = stage;
-			collisionGroup = new CollisionGroup;
+			
+			//keyPoll = new KeyPoll(_stage);
+			
+			_cGroup = new CollisionGroup;
+			
+			trace('Creating head up display...');
+			_hud = new HUDisplay;
+			_stage.addChild(_hud);
 		}
 		
 		public function addVehicle(vehicle:Vehicle):void
 		{
+			trace('Adding vehicle to engine...');
 			_vehicles.push(vehicle);
-			collisionGroup.addItem(vehicle);
+			initVehiclePosition(vehicle);
+			_stage.addChild(vehicle);
 			
-			//TEST
-			_cdk.addItem(vehicle);
+			// Add vehicle to collision group
+			_cGroup.addItem(vehicle);
+		}
+		
+		private function initVehiclePosition(vehicle:Vehicle):void
+		{
+			// Retrive start positions from track
+			var i:int = _vehicles.indexOf(vehicle);
+			var vp:XML = _currentTrack.getVehiclePosition(i);
+			
+			// Setting positions
+			trace('Moving vehicle with index '+vp.@index+' to ('+vp.@x+', '+vp.@y+', r'+vp.@rotation+')...');
+			vehicle.x = vp.@x;
+			vehicle.y = vp.@y;
+			vehicle.rotation = vp.@rotation
 		}
 		
 		public function loadTrack(config:XML):void
 		{
 			trace('Loading a new track...');
-			var _currentTrack:Track = new Track(config);
-			_stage.addChildAt(_currentTrack, 0);
+			if(_currentTrack != null) {
+				_cGroup.removeItem(_currentTrack.areas);
+			}
+			_currentTrack = new Track(config);
+			_cGroup.addItem(_currentTrack.areas);
 			
-			//TEST
-			_cdk = new CollisionList(_currentTrack.areas);
-			_cdk.excludeColor(0xFFFFFFFF, 255, 0, 0, 0);
+			_stage.addChildAt(_currentTrack, 0);
 		}
 		
 		public function start():void
 		{
-			keyPoll = new KeyPoll(_stage);
-			
-			trace('Creating head up display...');
-			_hud = new HUDisplay;
-			_stage.addChild(_hud);
-			
+			trace('Starting engine...');
 			_stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+			
+			for each(var vehicle:Vehicle in _vehicles)
+			{
+				vehicle.start();
+			}
 		}
 		
 		public function stop():void
 		{
+			trace('Stopping engine...');
 			_stage.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+			
+			for each(var vehicle:Vehicle in _vehicles)
+			{
+				vehicle.stop();
+			}
 		}
 		
 		private function onEnterFrame(event:Event):void
 		{
-			for each (var vehicle:Vehicle in _vehicles) {
-				updateSpeed(vehicle);
-				/*if(isColliding()) {
-					handleCollision(vehicle);
-				}*/
-				updateDirection(vehicle);
-				if(vehicle.speed != 0) {
-					//TEST
-					for each(var c:Object in _cdk.checkCollisions()) {
-						//trace('Collision between '+c.object1+' and '+c.object2+' (angle '+c.angle+')');
-						_hud.collides.text = c.object1+" colliding with "+c.object2+"\n";
-					}
-					
-					// Kinetic
-					if(keyPoll.isUp(vehicle.upKey) && vehicle.speed > 0) {
-						vehicle.decreaseSpeed(1);
-						//vehicle.stop();
-					}
-					if(keyPoll.isUp(vehicle.downKey) && vehicle.speed < 0) {
-						vehicle.increaseSpeed(1);
-						//vehicle.stop();
-					}
-					updatePosition(vehicle);
-				}
-			}
 			// Updating speeds on HUD
-			_hud.setSpeed(_vehicles[0].speed, _vehicles[1].speed);
+			//_hud.setSpeed(_vehicles[0].speed, _vehicles[1].speed);
 		}
 		
-		private function isColliding():Boolean
+		/*private function isColliding():Boolean
 		{
 			var collisions:Array = collisionGroup.checkCollisions();
 			_hud.collides.text = "No collidings";
@@ -109,9 +111,9 @@ package fr.mathieudarse.peanut
 			else {
 				return false;
 			}
-		}
+		}*/
 		
-		private function updateSpeed(vehicle:Vehicle):void
+		/*private function updateSpeed(vehicle:Vehicle):void
 		{
 			// Speed variations
 			if(keyPoll.isDown(vehicle.upKey)) {
@@ -158,6 +160,6 @@ package fr.mathieudarse.peanut
 		private function handleCollision(vehicle:Vehicle):void
 		{
 			vehicle.speed = vehicle.speed/2;
-		}
+		}*/
 	}
 }

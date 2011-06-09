@@ -16,75 +16,74 @@ package
 	import flash.text.TextField;
 	import flash.ui.Keyboard;
 	
-	import fr.mathieudarse.peanut.Car;
 	import fr.mathieudarse.peanut.Engine;
-	import fr.mathieudarse.peanut.HUDisplay;
-	import fr.mathieudarse.peanut.MenuContainer;
 	import fr.mathieudarse.peanut.Track;
+	import fr.mathieudarse.peanut.UI;
 	import fr.mathieudarse.peanut.Vehicle;
 	
 	//[SWF(width="500", height="450", frameRate="60", backgroundColor="#FFFFFF")]
 	[SWF(width="960", height="540")]
 	public class JailRace extends Sprite
 	{
-		//private var _bgShape:Shape;
-		//private var _bgColor:uint = 0x000000;
-		
-		private var menu:MenuContainer;
-		private var vehicle0:Vehicle;
-		private var vehicle1:Vehicle;
-		private var engine:Engine;
-		private var hud:HUDisplay;
+		private var _ui:UI;
+		private var _engine:Engine;
 		
 		private var _tracks:XML;
+		private var _vehicles:XML;
 		private var _menus:XML;
 		
 		public function JailRace()
 		{
 			trace('JailRace started...');
-			_init();
-		}
-		
-		private function _init():void
-		{
+			// Setting stage background and scale options
+			initStage();
+			
 			// Create data loader
 			LoaderMax.activate([ImageLoader]);
 			var queue:LoaderMax = new LoaderMax({
 				name: 'mainQueue', 
 				onProgress: onLoaderProgress, 
-				onComplete: onLoaderComplete, 
+				onComplete: init, 
 				onError: onLoaderError
 			});
 			// Load config
 			queue.append(new XMLLoader('config/tracks.xml', {name: 'tracks'}));
+			queue.append(new XMLLoader('config/vehicles.xml', {name: 'vehicles'}));
 			queue.append(new XMLLoader('config/menus.xml', {name: 'menus'}));
 			queue.load();
-			
-			initStage(); // Setting stage background and scale options
-			//initMenu();
-			
-			
-			createVehicles(); // Creating vehicles
-			bindVehiclesKeys(); // Key bindings
-			
 		}
-
-		private function getTrackXML(id:String):XML
+		
+		private function init(e:LoaderEvent):void
 		{
-			return _tracks.track.(@id==id)[0];
+			// Store configuration
+			_tracks = LoaderMax.getContent('tracks');
+			_vehicles = LoaderMax.getContent('vehicles');
+			_menus = LoaderMax.getContent('menus');
+			
+			_ui = new UI(stage, _menus);
+			//_ui.show();
+			//_ui.goHome();
+			
+			_engine = new Engine(stage);
+			initEngine();
+			_engine.start();
 		}
 		
 		private function initEngine():void
 		{
-			engine = new Engine(stage);
+			var tConfig:XML = _tracks.track.(@id=='thefirstone')[0];
+			_engine.loadTrack(tConfig);
 			
-			engine.loadTrack(getTrackXML('thefirstone'));
+			var vConf0:XML = _vehicles.vehicle.(@id=='jailmobile')[0];
+			var v0:Vehicle = new Vehicle(vConf0);
+			v0.setCommandKeys(Keyboard.UP, Keyboard.DOWN, Keyboard.LEFT, Keyboard.RIGHT, Keyboard.ENTER);
+			_engine.addVehicle(v0);
 			
-			engine.addVehicle(vehicle0);
-			engine.addVehicle(vehicle1);
+			var vConf1:XML = _vehicles.vehicle.(@id=='racemobile')[0];
+			var v1:Vehicle = new Vehicle(vConf1);
+			v1.setCommandKeys(87, 83, 65, 68, Keyboard.TAB);
+			_engine.addVehicle(v1);
 			
-			trace('Starting engine...');
-			engine.start();
 		}
 		
 		private function initStage():void
@@ -94,60 +93,15 @@ package
 			//stage.align = StageAlign.TOP_LEFT; // Align stage on top left
 			trace('Stage size:', stage.stageWidth, 'x', stage.stageHeight);
 			
-			// Create a grey rectangle as background
-			initBackground();
-		}
-		
-		private function initBackground():void
-		{
-			/*_bgShape = new Shape;
-			_bgShape.graphics.beginFill(_bgColor);
-			_bgShape.graphics.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
-			_bgShape.graphics.endFill();
-			addChildAt(_bgShape, 0);*/
 			stage.addEventListener(Event.RESIZE, onStageResize);
 		}
 		
 		private function onStageResize(e:Event):void
 		{
-			//_bgShape.width = stage.stageWidth;
-			//_bgShape.height = stage.stageHeight;
 			trace('Stage resized to:', stage.stageWidth, 'x', stage.stageHeight);
 		}
 		
-		private function menuLoadedHandler(event:Event):void
-		{
-			menu = new MenuContainer(new XML(event.target.data));
-			addChild(menu);
-			menu.goToMenu('home');
-		}
-		
-		private function initMenu():void
-		{
-			trace('Loading menu configuration...');
-			var loader:URLLoader = new URLLoader();
-			loader.addEventListener(Event.COMPLETE, menuLoadedHandler);
-			loader.load(new URLRequest('config/menus.xml'));
-		}
-		
-		private function createVehicles():void
-		{
-			trace('Creating vehicles...');
-			// First vehicle
-			vehicle0 = new Car;
-			vehicle0.color = 0x000000;
-			vehicle0.draw();
-			addChild(vehicle0);
-			// Second vehicle
-			vehicle1 = new Vehicle;
-			vehicle1.color = 0x00ff00;
-			vehicle1.draw();
-			addChild(vehicle1);
-			vehicle1.x += 0;
-			vehicle1.y += 40;
-		}
-		
-		private function bindVehiclesKeys():void
+		/*private function bindVehiclesKeys():void
 		{
 			trace('Binding keys...');
 			vehicle0.leftKey = Keyboard.LEFT;
@@ -159,19 +113,10 @@ package
 			vehicle1.rightKey = 68;  // D key (68)
 			vehicle1.upKey = 87;     // Z key (90)
 			vehicle1.downKey = 83;   // S key (83)
-		}
+		}*/
 		
 		private function onLoaderProgress(event:LoaderEvent):void{
 			//trace("progress: " + event.target.progress);
-		}
-		
-		private function onLoaderComplete(event:LoaderEvent):void {
-			//trace(event.target + " is complete!");
-			
-			_tracks = LoaderMax.getContent('tracks');
-			_menus = LoaderMax.getContent('menus');
-			
-			initEngine();
 		}
 		
 		private function onLoaderError(event:LoaderEvent):void {

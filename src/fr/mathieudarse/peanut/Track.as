@@ -15,28 +15,35 @@ package fr.mathieudarse.peanut
 		private var _areas:Bitmap;
 		private var _finish:Line;
 		private var _checkpoints:Array = new Array;
+		private var _config:XML;
 		
-		public function Track(track:XML)
+		public function Track(config:XML)
 		{
 			super();
+			_config = config;
 			
-			//_texture = LoaderMax.getContent(track.texture);
-			_texture = LoaderMax.getContent(track.texture).rawContent;
+			_texture = LoaderMax.getContent(_config.texture).rawContent;
 			addChild(_texture);
-			_areas = LoaderMax.getContent(track.areas).rawContent;
-			addChild(_areas);
+			_areas = LoaderMax.getContent(_config.areas).rawContent;
+			//addChild(_areas);
 			
-			// Creates specific delimiters;
+			
 			// Starting/finish line
-			var sc:XML = track.positions.finish[0];
+			var sc:XML = _config.positions.finish[0];
 			_finish = new Line(sc.@fromX, sc.@fromY, sc.@toX, sc.@toY);
 			addChild(_finish);
+			
 			// Checkpoints
-			for each(var cc:XML in track.positions.checkpoint) {
+			for each(var cc:XML in _config.positions.checkpoint) {
 				var checkpoint:Line = new Line(cc.@fromX, cc.@fromY, cc.@toX, cc.@toY, cc.@index);
 				_checkpoints.push(checkpoint);
 				addChild(checkpoint);
 			}
+		}
+		
+		public function getVehiclePosition(index:uint):XML
+		{
+			return _config.positions.vehicle[index];
 		}
 		
 		public function get areas():Bitmap {
