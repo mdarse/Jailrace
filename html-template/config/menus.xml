@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menus>
+	<ImageLoader name="background0" load="true" url="ui/background0.png" />
+	<background>background0</background>
+	<menu id="home">
+		<ImageLoader name="home_car" load="true" url="ui/home_car.png" />
+		<layer appearFrom="left">home_car</layer>
+		<ImageLoader name="home_text" load="true" url="ui/home_text.png" />
+		<layer appearFrom="left">home_text</layer>
+		<ImageLoader name="home_side" load="true" url="ui/home_side.png" />
+		<layer appearFrom="right">home_side</layer>
+		<buttons>
+			<button id="start" x="100" y="100">
+				<media></media>
+				<mediaOver></mediaOver>
+				<mediaPressed></mediaPressed>
+				<action>
+					<kind>gotomenu</kind>
+					<target>options</target>
+				</action>
+			</button>
+			<button id="start" x="100" y="300">
+				<media></media>
+				<mediaOver></mediaOver>
+				<mediaPressed></mediaPressed>
+				<action>
+					<kind>gotomenu</kind>
+					<target>options</target>
+				</action>
+			</button>
+		</buttons>
+		<background>media/menu_home.jpg</background>
+	</menu>
+	<menu id="game">
+		<background>media/xxxxxx.png</background>
+	</menu>
+</menus>

@@ -6,6 +6,9 @@ package fr.mathieudarse.peanut
 	import flash.display.Stage;
 	import flash.events.Event;
 	import flash.text.TextField;
+	import flash.text.TextFormat;
+	import flash.utils.getQualifiedClassName;
+	import flash.utils.getTimer;
 	
 	import uk.co.bigroom.input.KeyPoll;
 	
@@ -21,17 +24,35 @@ package fr.mathieudarse.peanut
 		private var _cGroup:CollisionGroup;
 		private var _hud:HUDisplay;
 		
+		private var _collides:TextField;
+		private var _fpsTrkField:TextField;
+		private var _fpsTrkMax:int = 30;
+		private var _fpsTrkCurrent:int = 0;
+		private var _fpsTrkPrevTime:int;
+		
 		public function Engine(stage:Stage):void
 		{
 			_stage = stage;
 			
 			//keyPoll = new KeyPoll(_stage);
 			
-			_cGroup = new CollisionGroup;
+			// FPS Tracker
+			_fpsTrkField = new TextField;
+			_fpsTrkField.defaultTextFormat = new TextFormat('Verdana', 12, 0xFFFF00);
+			_fpsTrkField.y = 520;
+			_stage.addChild(_fpsTrkField);
+			// End FPS
 			
-			trace('Creating head up display...');
-			_hud = new HUDisplay;
-			_stage.addChild(_hud);
+			_collides = new TextField();
+			_collides.defaultTextFormat = new TextFormat('Verdana', 10, 0x00ff00);
+			_collides.x = 110;
+			_collides.width = 800;
+			_collides.height = 50;
+			_stage.addChild(_collides);
+			
+			_cGroup = new CollisionGroup;
+			_cGroup.returnAngleType = 'DEGREES';
+			
 		}
 		
 		public function addVehicle(vehicle:Vehicle):void
@@ -94,6 +115,31 @@ package fr.mathieudarse.peanut
 		
 		private function onEnterFrame(event:Event):void
 		{
+			// FPS Tracker
+			_fpsTrkCurrent++;
+			if(_fpsTrkCurrent == _fpsTrkMax) {
+				var currentTime:int = getTimer();
+				_fpsTrkField.text = (1000*_fpsTrkMax/(currentTime-_fpsTrkPrevTime)).toFixed(2)+' FPS';
+				_fpsTrkCurrent = 0;
+				_fpsTrkPrevTime = currentTime;
+			}
+			// End FPS
+			
+			var collisions:Array = _cGroup.checkCollisions();
+			var text:String = "";
+			for each(var c:Object in collisions) {
+				text += 'Collision between '+c.object1+' and '+c.object2+' ('+c.angle+")\n";
+				
+				if(getQualifiedClassName(c.object1) == 'fr.mathieudarse.peanut::Vehicle') {
+					c.object1.bounce();
+				}
+				if(getQualifiedClassName(c.object2) == 'fr.mathieudarse.peanut::Vehicle') {
+					c.object2.bounce();
+				}
+				
+			}
+			_collides.text = text;
+			
 			// Updating speeds on HUD
 			//_hud.setSpeed(_vehicles[0].speed, _vehicles[1].speed);
 		}

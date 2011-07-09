@@ -31,13 +31,13 @@ package fr.mathieudarse.peanut
 			// Starting/finish line
 			var sc:XML = _config.positions.finish[0];
 			_finish = new Line(sc.@fromX, sc.@fromY, sc.@toX, sc.@toY);
-			addChild(_finish);
+			//addChild(_finish);
 			
 			// Checkpoints
 			for each(var cc:XML in _config.positions.checkpoint) {
 				var checkpoint:Line = new Line(cc.@fromX, cc.@fromY, cc.@toX, cc.@toY, cc.@index);
 				_checkpoints.push(checkpoint);
-				addChild(checkpoint);
+				//addChild(checkpoint);
 			}
 		}
 		

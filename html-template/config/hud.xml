@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hud>
+	<ImageLoader name="hud_player1" load="true" url="ui/hud_player1.png" />
+	<ImageLoader name="hud_player2" load="true" url="ui/hud_player2.png" />
+	<!-- <ImageLoader name="hud_n1" load="true" url="ui/hud_n1.png" />
+	<ImageLoader name="hud_n2" load="true" url="ui/hud_n2.png" />
+	<ImageLoader name="hud_n3" load="true" url="ui/hud_n3.png" /> -->
+</hud>

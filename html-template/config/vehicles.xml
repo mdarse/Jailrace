@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vehicles>
+	<vehicle id="jailmobile">
+		<name>JailMobile</name>
+		<ImageLoader name="vehicle0" load="true" url="vehicles/jailmobile/voiture1.png" />
+		<texture>vehicle0</texture>
+		<scale>2</scale>
+	</vehicle>
+	<vehicle id="racemobile">
+		<name>RaceMobile</name>
+		<ImageLoader name="vehicle1" load="true" url="vehicles/racemobile/voiture2.png" />
+		<texture>vehicle1</texture>
+	</vehicle>
+</vehicles>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tracks>
+	<track id="thefirstone">
+		<name>The First One</name>
+		<ImageLoader name="texture0" load="true" url="tracks/thefirstone/texture.png" />
+		<texture>texture0</texture>
+		<ImageLoader name="area0" load="true" url="tracks/thefirstone/area_alpha.png" />
+		<areas>area0</areas>
+		<positions>
+			<vehicle index="0" x="370" y="40" rotation="90" />
+			<vehicle index="1" x="370" y="80" rotation="90" />
+			<finish fromX="460" fromY="20" toX="460" toY="100" />
+			<checkpoint index="0" fromX="760" fromY="280" toX="890" toY="270" />
+			<checkpoint index="1" fromX="215" fromY="390" toX="80" toY="440" />
+			<!-- <checkpoint index="2" x="" y="" width="80" rotation="0" /> -->
+		</positions>
+	</track>
+	<track id="thedeuz">
+		<name>The Deuz</name>
+		<ImageLoader name="texture1" load="true" url="tracks/thedeuz/texture.png" />
+		<texture>texture1</texture>
+		<ImageLoader name="area1" load="true" url="tracks/thedeuz/area_alpha.png" />
+		<areas>area1</areas>
+		<positions>
+			<vehicle index="0" x="408" y="457" rotation="90" />
+			<vehicle index="1" x="408" y="492" rotation="90" />
+			<finish fromX="408" fromY="436" toX="408" toY="517" />
+			<checkpoint index="0" fromX="663" fromY="49" toX="663" toY="133" />
+			<checkpoint index="1" fromX="70" fromY="267" toX="18" toY="267" />
+			<!-- <checkpoint index="2" x="" y="" width="80" rotation="0" /> -->
+		</positions>
+	</track>
+	<track id="crymap">
+		<name>Crymap</name>
+		<ImageLoader name="texture2" load="true" url="tracks/crymap/texture.jpg" />
+		<texture>texture2</texture>
+		<ImageLoader name="area2" load="true" url="tracks/crymap/area_alpha.png" />
+		<areas>area2</areas>
+		<positions>
+			<vehicle index="0" x="875" y="327" rotation="0" />
+			<vehicle index="1" x="915" y="327" rotation="0" />
+			<finish fromX="854" fromY="290" toX="933" toY="295" />
+			<checkpoint index="0" fromX="410" fromY="65" toX="410" toY="131" />
+			<checkpoint index="1" fromX="736" fromY="444" toX="740" toY="535" />
+			<!-- <checkpoint index="2" x="" y="" width="80" rotation="0" /> -->
+		</positions>
+	</track>
+</tracks>

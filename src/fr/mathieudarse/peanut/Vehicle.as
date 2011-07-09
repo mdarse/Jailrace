@@ -5,31 +5,36 @@ package fr.mathieudarse.peanut
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
+	import flash.display.Stage;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	
 	public class Vehicle extends Sprite
 	{
+		private const PI_OVER_ONE_HEIGHTY:Number = Math.PI / 180;
+		
 		// TODO : Move some vars into XML
-		private var speed:Number = 0;
-		private var speedMax:Number = 20;
-		private var speedMaxReverse:Number = -3;
-		private var speedAcceleration:Number = .6;
-		private var speedDeceleration:Number = .5;
-		private var groundFriction:Number = .95;
+		private var _speed:Number = 0;
+		private var _speedMax:Number = 8;
+		private var _speedMaxReverse:Number = -2;
+		private var _speedAcceleration:Number = .5;
+		private var _speedDeceleration:Number = .4;
+		private var _groundFriction:Number = .95;
 		
-		private var steering:Number = 0;
-		private var steeringMax:Number = 10;
-		private var steeringAcceleration:Number = .10;
-		private var steeringFriction:Number = .98;
+		private var _steering:Number = 0;
+		private var _steeringMax:Number = 2;
+		private var _steeringAcceleration:Number = .15;
+		private var _steeringFriction:Number = .98;
 		
-		private var velocityX:Number = 0;
-		private var velocityY:Number = 0;
+		private var _velocityX:Number = 0;
+		private var _velocityY:Number = 0;
 		
-		private var up:Boolean = false;
-		private var down:Boolean = false;
-		private var left:Boolean = false;
-		private var right:Boolean = false;
+		private var _up:Boolean = false;
+		private var _down:Boolean = false;
+		private var _left:Boolean = false;
+		private var _right:Boolean = false;
+		
+		private var _fire:Boolean = false;
 		
 		private var _upKey:uint;
 		private var _downKey:uint;
@@ -38,26 +43,31 @@ package fr.mathieudarse.peanut
 		private var _fireKey:uint;
 		
 		private var _texture:Bitmap;
+		private var _stage:Stage;
 		private var _config:XML;
 		
+		public var inCollision:Boolean;
 		//public var lastX:int;
 		//public var lastY:int;
 		//public var color:uint;
 		
-		public function Vehicle(config:XML):void
+		public function Vehicle(stage:Stage, config:XML):void
 		{
 			super();
+			_stage = stage;
 			_config = config;
 			
-			graphics.beginFill(0xFF0000);
+			/*graphics.beginFill(0xFF0000);
 			graphics.drawRect(-1,-50,2,100);
-			graphics.endFill();
+			graphics.endFill();*/
 			
 			// Adds texture to vehicle
 			var bd:BitmapData = LoaderMax.getContent(_config.texture).rawContent.bitmapData;
 			_texture = new Bitmap(bd);
 			_texture.x = bd.width/-2;
 			_texture.y = bd.height/-2;
+			//_texture.scaleX = 0.5;
+			//_texture.scaleY = 0.5;
 			addChild(_texture);
 		}
 		
@@ -77,120 +87,139 @@ package fr.mathieudarse.peanut
 		
 		public function start():void
 		{
-			stage.addEventListener(Event.ENTER_FRAME, updatePosition);
+			stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
 			stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 			stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
 		
 		public function stop():void
 		{
-			stage.removeEventListener(Event.ENTER_FRAME, updatePosition);
+			stage.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 			stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 			stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
+			
+			_speed = 0;
 		}
 		
-		private function updatePosition(e:Event):void
+		private function onEnterFrame(e:Event):void
 		{
-			if (up)
+			if (_up)
 			{
 				//check if below speedMax
-				if (speed < speedMax)
+				if (_speed < _speedMax)
 				{
 					//speed up
-					speed += speedAcceleration;
+					_speed += _speedAcceleration;
 					//check if above speedMax
-					if (speed > speedMax)
+					if (_speed > _speedMax)
 					{
 						//reset to speedMax
-						speed = speedMax;
+						_speed = _speedMax;
 					}
 				}
 			}
 			
-			if (down)
+			if (_down)
 			{
 				//check if below speedMaxReverse
-				if (speed > speedMaxReverse)
+				if (_speed > _speedMaxReverse)
 				{
 					//speed up (in reverse)
-					speed -= speedAcceleration;
+					_speed -= _speedAcceleration;
 					//check if above speedMaxReverse
-					if (speed < speedMaxReverse)
+					if (_speed < _speedMaxReverse)
 					{
 						//reset to speedMaxReverse
-						speed = speedMaxReverse;
+						_speed = _speedMaxReverse;
 					}
 				}
 			}
 			
-			if (left)
+			if (_left)
 			{
 				//turn left
-				steering -= steeringAcceleration;
+				_steering -= _steeringAcceleration;
 				//check if above steeringMax
-				if (steering > steeringMax)
+				if (_steering > _steeringMax)
 				{
 					//reset to steeringMax
-					steering = steeringMax;
+					_steering = _steeringMax;
 				}
 			}
 			
-			if (right)
+			if (_right)
 			{
 				//turn right
-				steering += steeringAcceleration;
+				_steering += _steeringAcceleration;
 				//check if above steeringMax
-				if (steering < -steeringMax)
+				if (_steering < -_steeringMax)
 				{
 					//reset to steeringMax
-					steering = -steeringMax;
+					_steering = -_steeringMax;
 				}
 			}
 			
 			// friction    
-			speed *= groundFriction;
+			_speed *= _groundFriction;
 			
 			// prevent drift
-			if(speed > 0 && speed < 0.05)
+			if(_speed > 0 && _speed < 0.05)
 			{
-				speed = 0
+				_speed = 0
+			}
+			if(_speed < 0 && _speed > -0.05)
+			{
+				_speed = 0
 			}
 			
 			// calculate velocity based on speed
-			velocityX = Math.sin (this.rotation * Math.PI / 180) * speed;
-			velocityY = Math.cos (this.rotation * Math.PI / 180) * -speed;
+			_velocityX = Math.sin (this.rotation * PI_OVER_ONE_HEIGHTY) * _speed;
+			_velocityY = Math.cos (this.rotation * PI_OVER_ONE_HEIGHTY) * -_speed;
 			
 			// update position	
-			this.x += velocityX;
-			this.y += velocityY;
+			this.x += _velocityX;
+			this.y += _velocityY;
 			
 			// prevent steering drift (right)
-			if(steering > 0)
+			if(_steering > 0)
 			{
 				// check if steering value is really low, set to 0
-				if(steering < 0.05)
+				if(_steering < 0.05)
 				{
-					steering = 0;
+					_steering = 0;
 				}		
 			}
 			// prevent steering drift (left)
-			else if(steering < 0)
+			else if(_steering < 0)
 			{
 				// check if steering value is really low, set to 0
-				if(steering > -0.05)
+				if(_steering > -0.05)
 				{
-					steering = 0;
+					_steering = 0;
 				}		
 			}
 			
 			// apply steering friction
-			steering = steering * steeringFriction;
+			_steering = _steering * _steeringFriction;
 			
 			// make car go straight after driver stops turning
-			steering -= (steering * 0.1);
+			_steering -= (_steering * 0.1);
 			
 			// rotate
-			this.rotation += steering * speed;
+			this.rotation += _steering * _speed;
+			
+			////////////////////
+			// Fire!
+			if(_fire)
+			{
+				var bullet:Bullet = new Bullet(_stage, this.x, this.y, this.rotation, 20);
+			}
+			// End fire
+		}
+		
+		public function bounce(weakening:Number = .5):void
+		{
+			_speed *= -weakening;
 		}
 		
 		private function onKeyPress(e:KeyboardEvent):void
@@ -198,19 +227,23 @@ package fr.mathieudarse.peanut
 			switch(e.keyCode)
 			{
 				case _upKey:
-					up = true;
+					_up = true;
 					break;
 				
 				case _downKey:
-					down = true;
+					_down = true;
 					break;
 				
 				case _leftKey:
-					left = true;
+					_left = true;
 					break;
 				
 				case _rightKey:
-					right = true;
+					_right = true;
+					break;
+				
+				case _fireKey:
+					_fire = true;
 					break;
 			}
 			
@@ -222,19 +255,23 @@ package fr.mathieudarse.peanut
 			switch(e.keyCode)
 			{
 				case _upKey:
-					up = false;
+					_up = false;
 					break;
 				
 				case _downKey:
-					down = false;
+					_down = false;
 					break;
 				
 				case _leftKey:
-					left = false;
+					_left = false;
 					break;
 				
 				case _rightKey:
-					right = false;
+					_right = false;
+					break;
+				
+				case _fireKey:
+					_fire = false;
 					break;
 			}
 		}
@@ -252,14 +289,14 @@ package fr.mathieudarse.peanut
 			this.y += vWidth/2;
 		}*/
 		
-		/*public function get speed():int
+		public function get speed():Number
 		{
 			return _speed;
 		}
 		
-		public function set speed(speed:int):void
+		/*public function set speed(speed:int):void
 		{
-			this._speed = speed;
+			_speed = speed;
 		}*/
 		
 		/*public function increaseSpeed(amount:uint):void
